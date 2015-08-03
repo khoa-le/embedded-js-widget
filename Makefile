@@ -7,4 +7,4 @@ css:
 	r.js -o cssIn=css/my-widget.css out=css/my-widget_embed.css
 
 js:
-	r.js -o embed.build.js
+	r.js -o embed.build.js optimize=none

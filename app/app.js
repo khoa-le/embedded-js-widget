@@ -1,11 +1,34 @@
-define(['jquery', 'Ractive', 'rv!templates/template', 'text!css/my-widget_embed.css'], function ($, Ractive, mainTemplate, css) {
+define(['jquery', 'ractive', 'rv!templates/template', 'text!css/my-widget_embed.css'], function ($, Ractive, mainTemplate, css) {
 
     'use strict';
 
     var app = {
+        cors: function(method, url) {
+            var xhr = new XMLHttpRequest();
+            if ("withCredentials" in xhr) {
+
+                // Check if the XMLHttpRequest object has a "withCredentials" property.
+                // "withCredentials" only exists on XMLHTTPRequest2 objects.
+                xhr.open(method, url, true);
+
+            } else if (typeof XDomainRequest != "undefined") {
+
+                // Otherwise, check if XDomainRequest.
+                // XDomainRequest only exists in IE, and is IE's way of making CORS requests.
+                xhr = new XDomainRequest();
+                xhr.open(method, url);
+
+            } else {
+
+                // Otherwise, CORS is not supported by the browser.
+                xhr = null;
+
+            }
+            return xhr;
+        },
         init: function () {
 
-            Ractive.DEBUG = false;
+            Ractive.DEBUG = true;
 
 
             var $style = $("<style></style>", {type: "text/css"});
@@ -27,12 +50,13 @@ define(['jquery', 'Ractive', 'rv!templates/template', 'text!css/my-widget_embed.
                     this.set('cnt', this.get('cnt') + 1);
                     var that = this;
 
+
                     $.ajaxSetup({
                         beforeSend: function (xhr) {
                             xhr.setRequestHeader('content-md5', '4c443c7e2c515d6b4b4d693c2f63434a7773226a614846733c4c4d4348');
                         }
                     });
-
+/*
                     $.ajax({
                         url: "https://api-staging.vietnamworks.com/jobs/search/",
                         dataType: "jsonp",
@@ -50,15 +74,24 @@ define(['jquery', 'Ractive', 'rv!templates/template', 'text!css/my-widget_embed.
 
                         that.set("ts", "Something bad happened");
                     });
+                    */
+                   var xhr = app.cors("GET","http://dev.vietnamworks.com/jobseekers/test.php");
+                    if (!xhr) {
+                        throw new Error('CORS not supported');
+                    }
 
-                    /*$.ajax({
+                    xhr.send();
+                    /*
+                    $.ajax({
                         url: "http://date.jsontest.com/",
                         dataType: "jsonp"
                     }).then(function (resp) {
+                        console.log(resp);
                         that.set("ts", resp.time);
                     }, function (resp) {
                         that.set("ts", "Something bad happened");
-                    });*/
+                    });
+                    */
                 }
             });
         }
