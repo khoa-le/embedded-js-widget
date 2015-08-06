@@ -4,7 +4,11 @@ define(['jquery', 'ractive', 'rv!templates/job', 'text!css/my-widget_embed.css']
     wnwQuery.noConflict(true);
     var app = {
         init: function () {
-            Ractive.DEBUG = true;
+            Ractive.DEBUG = false;
+            var html = '<html><head></head><body>Foo</body></html>';
+            var $iframe = vnwQuery("<iframe></iframe>");
+
+            wnwQuery("#vietnamworks-jobs").append($iframe);
             var $style = wnwQuery("<style></style>", {type: "text/css"});
             $style.text(css);
             wnwQuery("head").append($style);
@@ -22,13 +26,14 @@ define(['jquery', 'ractive', 'rv!templates/job', 'text!css/my-widget_embed.css']
                 }
 
             }).then(function (resp) {
-                console.log(resp);
+
                 resp = wnwQuery.parseJSON(resp);
                 var data = resp.data;
-                console.log(data);
+
                 // render our main view
                 this.ractive = new Ractive({
-                    el: wnwQuery('#vietnamworks-jobs'),
+
+                    el: wnwQuery("#vietnamworks-jobs"),
                     template: jobTemplate,
                     data: {
                         jobs:data.jobs
@@ -58,10 +63,10 @@ define(['jquery', 'ractive', 'rv!templates/job', 'text!css/my-widget_embed.css']
                 }
 
             }).then(function (resp) {
-                console.log(resp);
+
                 resp = wnwQuery.parseJSON(resp);
                 var data = resp.data;
-                console.log(data);
+
                 // render our main view
                 this.ractive = new Ractive({
                     el: wnwQuery('#vietnamworks-jobs'),
