@@ -1,98 +1,77 @@
-define(['jquery', 'ractive', 'rv!templates/template', 'text!css/my-widget_embed.css'], function ($, Ractive, mainTemplate, css) {
+define(['jquery', 'ractive', 'rv!templates/job', 'text!css/my-widget_embed.css'], function (wnwQuery, Ractive, jobTemplate, css) {
 
     'use strict';
-
+    wnwQuery.noConflict(true);
     var app = {
-        cors: function(method, url) {
-            var xhr = new XMLHttpRequest();
-            if ("withCredentials" in xhr) {
-
-                // Check if the XMLHttpRequest object has a "withCredentials" property.
-                // "withCredentials" only exists on XMLHTTPRequest2 objects.
-                xhr.open(method, url, true);
-
-            } else if (typeof XDomainRequest != "undefined") {
-
-                // Otherwise, check if XDomainRequest.
-                // XDomainRequest only exists in IE, and is IE's way of making CORS requests.
-                xhr = new XDomainRequest();
-                xhr.open(method, url);
-
-            } else {
-
-                // Otherwise, CORS is not supported by the browser.
-                xhr = null;
-
-            }
-            return xhr;
-        },
         init: function () {
-
             Ractive.DEBUG = true;
-
-
-            var $style = $("<style></style>", {type: "text/css"});
+            var $style = wnwQuery("<style></style>", {type: "text/css"});
             $style.text(css);
-            $("head").append($style);
-
-            // render our main view
-            this.ractive = new Ractive({
-                el: 'myWidget',
-                template: mainTemplate,
+            wnwQuery("head").append($style);
+            wnwQuery.ajax({
+                url: "http://api.sontt.vnw25.com/jobs/search-jsonp/",
+                dataType: "jsonp",
                 data: {
-                    cnt: 0,
-                    ts: 'never'
+                    'CONTENT-MD5' : "4c443c7e2c515d6b4b4d693c2f63434a7773226a614846733c4c4d4348",
+                    'email': wnwQuery('#vietnamworks-jobs').data('vnw-email'),
+                    'job_title': wnwQuery('#vietnamworks-jobs').data('vnw-keyword'),
+                    'job_category': wnwQuery('#vietnamworks-jobs').data('vnw-industry'),
+                    'job_location': wnwQuery('#vietnamworks-jobs').data('vnw-location'),
+                    'page_size': wnwQuery('#vietnamworks-jobs').data('vnw-numjobs'),
+                    'lang': wnwQuery('#vietnamworks-jobs').data('vnw-lang')
                 }
-            });
-            this.ractive.on({
-                mwClick: function (ev) {
-                    ev.original.preventDefault();
-                    this.set('cnt', this.get('cnt') + 1);
-                    var that = this;
 
-
-                    $.ajaxSetup({
-                        beforeSend: function (xhr) {
-                            xhr.setRequestHeader('content-md5', '4c443c7e2c515d6b4b4d693c2f63434a7773226a614846733c4c4d4348');
-                        }
-                    });
-/*
-                    $.ajax({
-                        url: "https://api-staging.vietnamworks.com/jobs/search/",
-                        dataType: "jsonp",
-                        data: JSON.stringify({job_title: "test"})
-
-                    }).then(function (resp) {
-                        console.log(resp);
-                    }, function (resp) {
-                        console.log(resp);
-                        console.log(resp.data);
-                        console.log(resp.meta);
-                        console.log(resp.status);
-                        console.log(resp.statusText);
-                        console.log(resp.error());
-
-                        that.set("ts", "Something bad happened");
-                    });
-                    */
-                   var xhr = app.cors("GET","http://dev.vietnamworks.com/jobseekers/test.php");
-                    if (!xhr) {
-                        throw new Error('CORS not supported');
+            }).then(function (resp) {
+                console.log(resp);
+                resp = wnwQuery.parseJSON(resp);
+                var data = resp.data;
+                console.log(data);
+                // render our main view
+                this.ractive = new Ractive({
+                    el: wnwQuery('#vietnamworks-jobs'),
+                    template: jobTemplate,
+                    data: {
+                        jobs:data.jobs
                     }
+                });
+            }, function (resp) {
 
-                    xhr.send();
-                    /*
-                    $.ajax({
-                        url: "http://date.jsontest.com/",
-                        dataType: "jsonp"
-                    }).then(function (resp) {
-                        console.log(resp);
-                        that.set("ts", resp.time);
-                    }, function (resp) {
-                        that.set("ts", "Something bad happened");
-                    });
-                    */
+            });
+
+        },
+        reload: function ($email,$job_title,$job_category,$job_location,$page_size,$lang) {
+            Ractive.DEBUG = true;
+            var $style = wnwQuery("<style></style>", {type: "text/css"});
+            $style.text(css);
+            wnwQuery("head").append($style);
+            wnwQuery.ajax({
+                url: "http://api.sontt.vnw25.com/jobs/search-jsonp/",
+                dataType: "jsonp",
+                data: {
+                    'CONTENT-MD5' : "4c443c7e2c515d6b4b4d693c2f63434a7773226a614846733c4c4d4348",
+                    'email':$email,
+                    'job_title':$job_title,
+                    'job_category': $job_category,
+                    'job_location': $job_location,
+                    'page_size':$page_size,
+                    'lang': $lang
                 }
+
+            }).then(function (resp) {
+                console.log(resp);
+                resp = wnwQuery.parseJSON(resp);
+                var data = resp.data;
+                console.log(data);
+                // render our main view
+                this.ractive = new Ractive({
+                    el: wnwQuery('#vietnamworks-jobs'),
+                    template: jobTemplate,
+                    data: {
+                        jobs:data.jobs
+                    }
+                });
+            }, function (resp) {
+
             });
         }
     };
